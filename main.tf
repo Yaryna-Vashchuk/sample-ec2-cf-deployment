@@ -57,3 +57,26 @@ module "s3" {
   environment  = var.environment
   tags         = local.tags
 }
+
+module "acm" {
+  source = "../modules/acm"
+
+  domain_name = var.domain_name
+  zone_id     = var.zone_id
+
+  tags = local.tags
+}
+
+module "cloudfront" {
+  source = "../modules/cloudfront"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  domain_name         = var.domain_name
+  
+  acm_certificate_arn = module.acm.certificate_arn
+
+  s3_bucket_arn = module.s3.s3_bucket_arn
+
+  tags = local.tags
+}
