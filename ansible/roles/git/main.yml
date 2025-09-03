@@ -1,0 +1,30 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install Git
+  ansible.builtin.package:
+    name: git
+    state: present
+
+- name: Copy SSH key to Droplet
+  ansible.builtin.copy:
+    src: "{{ private_key_path_git }}"
+    dest: ~/.ssh/
+    mode: "0600"
+
+- name: Ensure SSH known_hosts file exists
+  ansible.builtin.file:
+    path: ~/.ssh/known_hosts
+    state: touch
+    mode: "0644"
+
+- name: Clone Git repository
+  ansible.builtin.git:
+    repo: '{{ git_repo_url }}'
+    dest: '~/repo'
+    version: stage
+    key_file: "~/.ssh/"
+    ssh_opts: '-o StrictHostKeyChecking=no'

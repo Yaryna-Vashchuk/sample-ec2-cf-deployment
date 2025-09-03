@@ -80,3 +80,21 @@ module "cloudfront" {
 
   tags = local.tags
 }
+
+resource "local_file" "ec2_key" {
+  content  = module.ec2.private_key_pem
+  filename = "${path.module}/ec2-key.pem"
+  file_permission = "0600"
+}
+
+resource "null_resource" "ansible_provision" {
+  depends_on = [module.ec2.public_ip]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "[web]" > hosts.ini
+      echo "${module.ec2.public_ip} ansible_user=ec2-user ansible_ssh_private_key_file=${path.module}/ec2-key.pem" >> hosts.ini
+      ansible-playbook -i hosts.ini main.yml
+    EOT
+  }
+}

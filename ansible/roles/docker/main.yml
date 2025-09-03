@@ -1,0 +1,66 @@
+---
+- name: Ensure apt cache is up to date
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hour
+
+- name: Install prerequisites
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+    state: present
+
+- name: Add Docker GPG dir
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/
+    state: directory
+    mode: "0755"
+
+- name: Add Docker GPG Key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+  register: docker_gpg_key
+
+- name: Fail if GPG key was not added
+  ansible.builtin.fail:
+    msg: "Failed to add Docker GPG Key!"
+  when: docker_gpg_key is failed
+
+- name: Add Docker Repository
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/ubuntu
+      {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+
+- name: Ensure Docker is started
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add User to Docker Group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
