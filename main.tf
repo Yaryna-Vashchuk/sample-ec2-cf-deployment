@@ -10,34 +10,40 @@ locals {
 }
 
 module "vpc" {
-  source = "../modules/vpc"
+  source = "./modules/vpc"
+  
+  project_name = var.project_name
   
   tags = local.tags
 }
 
 module "sg" {
-  source = "../modules/sg"
+  source = "./modules/sg"
   
   vpc_id         = module.vpc.vpc_id
   vpc_cidr_block = module.vpc.vpc_cidr_block
+
+  environment = var.environment
 
   tags = local.tags
 }
 
 
 module "ec2" {
-  source = "../modules/ec2"
+  source = "./modules/ec2"
 
   subnets = [
     module.vpc.public_subnets[0]
   ]
   ec2_security_group_id = module.sg.ec2_security_group_id
 
+  project_name = var.project_name
+
   tags = local.tags
 }
 
 module "rds" {
-  source = "../modules/rds"
+  source = "./modules/rds"
   
   subnets = [
     module.vpc.public_subnets[0]
@@ -51,7 +57,7 @@ module "rds" {
 }
 
 module "s3" {
-  source = "../modules/s3"
+  source = "./modules/s3"
 
   project_name = var.project_name
   environment  = var.environment
@@ -59,16 +65,16 @@ module "s3" {
 }
 
 module "acm" {
-  source = "../modules/acm"
+  source = "./modules/acm"
 
   domain_name = var.domain_name
-  zone_id     = var.zone_id
+  zone_id     = var.hosted_zone_id
 
   tags = local.tags
 }
 
 module "cloudfront" {
-  source = "../modules/cloudfront"
+  source = "./modules/cloudfront"
 
   project_name        = var.project_name
   environment         = var.environment

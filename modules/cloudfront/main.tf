@@ -61,8 +61,11 @@ module "cdn" {
       error_caching_min_ttl = 0
     }
   ]
+  viewer_certificate = {
+  acm_certificate_arn = var.acm_certificate_arn
+  ssl_support_method  = "sni-only"
+}
 
-  viewer_certificate = var.acm_certificate_arn
 
   tags = var.tags
 }

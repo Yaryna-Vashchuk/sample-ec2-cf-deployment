@@ -1,11 +1,3 @@
-output "s3_bucket_name" {
-  value = module.origin_bucket.s3_bucket_id
-}
-
-output "s3_bucket_arn" {
-  value = module.origin_bucket.s3_bucket_arn
-}
-
 output "cloudfront_distribution_id" {
   value = module.cdn.cloudfront_distribution_id
 }
