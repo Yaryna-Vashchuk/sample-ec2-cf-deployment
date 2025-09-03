@@ -43,7 +43,7 @@ module "rds" {
     module.vpc.public_subnets[0]
   ]
 
-  security_group_id     = module.sg.db_sg_id
+  security_group_id = module.sg.db_sg_id
 
   environment    = var.environment  
   project_name   = var.project_name
@@ -73,7 +73,7 @@ module "cloudfront" {
   project_name        = var.project_name
   environment         = var.environment
   domain_name         = var.domain_name
-  
+
   acm_certificate_arn = module.acm.certificate_arn
 
   s3_bucket_arn = module.s3.s3_bucket_arn
